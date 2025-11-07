@@ -1,10 +1,9 @@
 package main
 
 import (
-	"context"
 	"denet/config"
 	"denet/internal/app"
-	pg "denet/internal/store/postgresql"
+	
 
 	"log"
 
@@ -24,21 +23,6 @@ func main() {
 	conf, err := config.LoadConfig()
 	if err != nil {
 		return
-	}
-
-	db := pg.NewPostgresDatabase(conf.Database.URL)
-
-	if err := db.Connect(context.Background()); err != nil {
-		logger.Fatal("Failed to connect to database", zap.Error(err))
-	}
-	defer db.Close()
-
-	if err := db.Ping(context.Background()); err != nil {
-		logger.Fatal("Failed to ping database", zap.Error(err))
-	}
-
-	if err := db.RunMigrations(); err != nil {
-		logger.Fatal("Failed to run migrations", zap.Error(err))
 	}
 
 	err = app.New(conf, logger)
