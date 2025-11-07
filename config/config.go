@@ -1,18 +1,17 @@
 package config
 
-import "time"
+import (
+	"errors"
+	"time"
 
-type Config struct {
-	Server ServerConfig
-	Database DatabaseConfig
-	Logger LoggerConfig
-	JWT JWTConfig
-}
+	"github.com/caarlos0/env/v11"
+	"github.com/joho/godotenv"
+)
+
 
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
-	Logger   LoggerConfig
 	JWT      JWTConfig
 }
 
@@ -28,17 +27,19 @@ type DatabaseConfig struct {
 	ConnMaxExpired time.Duration `env:"DB_CONN_MAX_EXPIRED" default:"5m"`
 }
 
-type LoggerConfig struct {
-	LogLevel  string `env:"LOG_LEVEL" default:"info"`
-	LogFormat string `env:"LOG_FORMAT" default:"json"`
-}
-
 type JWTConfig struct {
 	SecretKey   string        `env:"JWT_SECRET_KEY" default:"your-default-secret-key"`
 	ExpireTime  time.Duration `env:"JWT_EXPIRE_TIME" default:"24h"`
 }
 
-func LoadConfig(path string) (*Config, error) {
+func LoadConfig() (*Config, error) {
+	_ = godotenv.Load()
 
+	var conf Config
+	if err := env.Parse(&conf); err != nil {
+		return nil, errors.New("Don't parse .env")
+	}
+
+	return &conf, nil
 }
 
