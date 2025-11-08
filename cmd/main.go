@@ -4,7 +4,6 @@ import (
 	"denet/config"
 	"denet/internal/app"
 	
-
 	"log"
 
 	"go.uber.org/zap"

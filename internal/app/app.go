@@ -5,9 +5,11 @@ import (
 	"denet/config"
 	"errors"
 
+	"denet/internal/handler"
+	"denet/internal/http"
 	"denet/internal/repository"
-	pg "denet/internal/store/postgresql"
 	"denet/internal/service"
+	pg "denet/internal/store/postgresql"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -33,11 +35,14 @@ func New(conf *config.Config, logger *zap.Logger) error {
 	uow := repository.NewPostgresUnitOfWork(db)
 
 	userService := service.NewUserService(uow)
-	
-	//добавить  auth service
+	authService := service.NewAuthService(uow)
 
+	//добавить auth service
 
-	r := gin.New()
+	userHandler  := handler.NewUserHandler(userService, logger)
+	authHandler  := handler.NewAuthHandler(authService, conf.JWT.SecretKey, logger)
+
+	r := http.NewRoute(authHandler, userHandler, *conf, logger)
 
 	serverAddr := conf.Server.Host + ":" + conf.Server.Port
 	logger.Info("Server starting",
