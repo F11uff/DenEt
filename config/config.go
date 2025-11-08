@@ -8,7 +8,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
@@ -21,15 +20,16 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	URL            string        `env:"DATABASE_URL" default:"postgres://user:password@localhost:5432/user_rewards?sslmode=disable"`
+	URL            string        `env:"DATABASE_URL" default:"postgres://postgres:postgresql@localhost:5432/postgres?sslmode=disable"`
+	Port           int           `env:"PORT_DB" default:"5432"`
 	MaxOpenConns   int           `env:"DB_MAX_OPEN_CONNS" default:"15"`
 	MaxIdleConns   int           `env:"DB_MAX_IDLE_CONNS" default:"10"`
 	ConnMaxExpired time.Duration `env:"DB_CONN_MAX_EXPIRED" default:"5m"`
 }
 
 type JWTConfig struct {
-	SecretKey   string        `env:"JWT_SECRET_KEY" default:"your-default-secret-key"`
-	ExpireTime  time.Duration `env:"JWT_EXPIRE_TIME" default:"24h"`
+	SecretKey  string        `env:"JWT_SECRET_KEY" default:"your-super-secret-jwt-key"`
+	ExpireTime time.Duration `env:"JWT_EXPIRE_TIME" default:"24h"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -37,9 +37,8 @@ func LoadConfig() (*Config, error) {
 
 	var conf Config
 	if err := env.Parse(&conf); err != nil {
-		return nil, errors.New("Don't parse .env")
+		return nil, errors.New("don't parse .env")
 	}
 
 	return &conf, nil
 }
-

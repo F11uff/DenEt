@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - HOST=localhost
+      - DATABASE_URL=postgres://postgres:postgresql@db:5432/postgres?sslmode=disable
+      - DB_MAX_OPEN_CONNS=15
+      - DB_MAX_IDLE_CONNS=10
+      - DB_CONN_MAX_EXPIRED=5m
+      - JWT_SECRET_KEY=your-super-secret-jwt-key
+      - JWT_EXPIRE_TIME=24h
+    depends_on:
+      - db  # Упрощаем depends_on
+    volumes:
+      - ./migrations:/app/migrations
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        sleep 10 &&
+        ./main
+      "
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresql
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # - ./migrations:/docker-entrypoint-initdb.d
+    # УБИРАЕМ healthcheck полностью
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
